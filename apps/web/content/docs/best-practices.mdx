@@ -1,0 +1,307 @@
+---
+title: Best Practices
+description: Error handling, rate limits, and design patterns
+icon: Lightbulb
+---
+
+## Error Handling
+
+### xAI API Errors
+
+```typescript
+import OpenAI from "openai"
+
+async function safeCompletion(messages: OpenAI.ChatCompletionMessageParam[]) {
+  const client = new OpenAI({
+    apiKey: process.env.XAI_API_KEY,
+    baseURL: "https://api.x.ai/v1",
+  })
+
+  try {
+    return await client.chat.completions.create({
+      model: "grok-3-latest",
+      messages,
+    })
+  } catch (error) {
+    if (error instanceof OpenAI.APIError) {
+      switch (error.status) {
+        case 400:
+          throw new Error(`Invalid request: ${error.message}`)
+        case 401:
+          throw new Error("Invalid API key")
+        case 403:
+          throw new Error("Access forbidden - check permissions")
+        case 429:
+          // Implement retry with backoff
+          throw new Error("Rate limited - retry later")
+        case 500:
+          throw new Error("xAI server error - retry later")
+        default:
+          throw new Error(`API error: ${error.status} - ${error.message}`)
+      }
+    }
+    throw error
+  }
+}
+```
+
+### Exponential Backoff
+
+```typescript
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  baseDelay = 1000
+): Promise<T> {
+  let lastError: Error | undefined
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error as Error
+
+      // Only retry on rate limits or server errors
+      if (
+        error instanceof OpenAI.APIError &&
+        (error.status === 429 || error.status >= 500)
+      ) {
+        const delay = baseDelay * 2 ** attempt
+        console.log(`Retry ${attempt + 1}/${maxRetries} after ${delay}ms`)
+        await new Promise((resolve) => setTimeout(resolve, delay))
+        continue
+      }
+
+      throw error
+    }
+  }
+
+  throw lastError
+}
+
+// Usage
+const result = await withRetry(() =>
+  client.chat.completions.create({
+    model: "grok-3-latest",
+    messages: [{ role: "user", content: "Hello" }],
+  })
+)
+```
+
+## Rate Limit Handling
+
+### X API Rate Limits
+
+```typescript
+class RateLimiter {
+  private requests: number[] = []
+  private limit: number
+  private window: number // milliseconds
+
+  constructor(limit: number, windowSeconds: number) {
+    this.limit = limit
+    this.window = windowSeconds * 1000
+  }
+
+  async waitForSlot(): Promise<void> {
+    const now = Date.now()
+    this.requests = this.requests.filter((t) => t > now - this.window)
+
+    if (this.requests.length >= this.limit) {
+      const oldestRequest = this.requests[0]
+      const waitTime = oldestRequest + this.window - now
+      await new Promise((resolve) => setTimeout(resolve, waitTime))
+    }
+
+    this.requests.push(Date.now())
+  }
+}
+
+// X API: 900 requests per 15 minutes for user timeline
+const timelineLimiter = new RateLimiter(900, 15 * 60)
+
+async function fetchTimeline(userId: string) {
+  await timelineLimiter.waitForSlot()
+  // Make API call...
+}
+```
+
+## Streaming Best Practices
+
+```typescript
+async function streamWithAbort(
+  prompt: string,
+  signal: AbortSignal
+): Promise<string> {
+  const stream = await client.chat.completions.create({
+    model: "grok-3-latest",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  })
+
+  let fullResponse = ""
+
+  try {
+    for await (const chunk of stream) {
+      if (signal.aborted) {
+        stream.controller.abort()
+        break
+      }
+
+      const content = chunk.choices[0]?.delta?.content
+      if (content) {
+        fullResponse += content
+        process.stdout.write(content)
+      }
+    }
+  } catch (error) {
+    if (signal.aborted) {
+      console.log("\nStream aborted by user")
+    } else {
+      throw error
+    }
+  }
+
+  return fullResponse
+}
+
+// Usage with timeout
+const controller = new AbortController()
+const timeout = setTimeout(() => controller.abort(), 30000)
+
+try {
+  await streamWithAbort("Write a story", controller.signal)
+} finally {
+  clearTimeout(timeout)
+}
+```
+
+## Environment Configuration
+
+```typescript
+// env.ts
+import { z } from "zod"
+
+const envSchema = z.object({
+  XAI_API_KEY: z.string().min(1, "XAI_API_KEY is required"),
+  X_BEARER_TOKEN: z.string().optional(),
+  X_CLIENT_ID: z.string().optional(),
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+})
+
+export const env = envSchema.parse(process.env)
+```
+
+## Client Singleton Pattern
+
+```typescript
+// xai-client.ts
+import OpenAI from "openai"
+
+let client: OpenAI | null = null
+
+export function getXAIClient(): OpenAI {
+  if (!client) {
+    if (!process.env.XAI_API_KEY) {
+      throw new Error("XAI_API_KEY environment variable is required")
+    }
+
+    client = new OpenAI({
+      apiKey: process.env.XAI_API_KEY,
+      baseURL: "https://api.x.ai/v1",
+    })
+  }
+
+  return client
+}
+```
+
+## Type-Safe Tool Definitions
+
+```typescript
+import { z } from "zod"
+import type OpenAI from "openai"
+
+// Define tool schema with Zod
+const weatherSchema = z.object({
+  location: z.string().describe("City name"),
+  unit: z.enum(["celsius", "fahrenheit"]).optional(),
+})
+
+type WeatherArgs = z.infer<typeof weatherSchema>
+
+// Convert to OpenAI tool format
+function zodToOpenAITool(
+  name: string,
+  description: string,
+  schema: z.ZodObject<any>
+): OpenAI.ChatCompletionTool {
+  return {
+    type: "function",
+    function: {
+      name,
+      description,
+      parameters: zodToJsonSchema(schema),
+    },
+  }
+}
+
+// Handle tool call with type safety
+function handleWeatherCall(argsJson: string): string {
+  const args = weatherSchema.parse(JSON.parse(argsJson))
+  // args is now typed as WeatherArgs
+  return `Weather in ${args.location}: 72°F`
+}
+```
+
+## Logging and Observability
+
+```typescript
+interface APICallLog {
+  timestamp: Date
+  model: string
+  promptTokens: number
+  completionTokens: number
+  latencyMs: number
+  success: boolean
+  error?: string
+}
+
+async function loggedCompletion(
+  messages: OpenAI.ChatCompletionMessageParam[]
+): Promise<OpenAI.ChatCompletion> {
+  const start = Date.now()
+
+  try {
+    const result = await client.chat.completions.create({
+      model: "grok-3-latest",
+      messages,
+    })
+
+    const log: APICallLog = {
+      timestamp: new Date(),
+      model: "grok-3-latest",
+      promptTokens: result.usage?.prompt_tokens ?? 0,
+      completionTokens: result.usage?.completion_tokens ?? 0,
+      latencyMs: Date.now() - start,
+      success: true,
+    }
+
+    console.log("API Call:", JSON.stringify(log))
+    return result
+  } catch (error) {
+    const log: APICallLog = {
+      timestamp: new Date(),
+      model: "grok-3-latest",
+      promptTokens: 0,
+      completionTokens: 0,
+      latencyMs: Date.now() - start,
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+
+    console.error("API Call Failed:", JSON.stringify(log))
+    throw error
+  }
+}
+```

@@ -1,0 +1,22 @@
+{
+  "name": "xai-solutions-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*", "examples"],
+  "scripts": {
+    "dev": "bun --cwd apps/web dev",
+    "dev:cli": "bun --cwd packages/cli dev",
+    "build": "bun --filter '*' build",
+    "build:web": "bun --cwd apps/web build",
+    "build:cli": "cd packages/cli && bun run build:artifacts",
+    "generate:manifest": "bun --cwd packages/cli scripts/generate-manifest.ts",
+    "test": "bun run generate:manifest && bun test",
+    "check": "biome check . --write && bunx tsc --build --force && bun run test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.16"
+  }
+}

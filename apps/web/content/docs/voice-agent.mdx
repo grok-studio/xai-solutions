@@ -1,0 +1,191 @@
+---
+title: Voice Agent
+description: WebSocket-based text-to-speech with Grok
+icon: Mic
+---
+
+## Live Voice API
+
+Grok's Live Voice API enables real-time voice conversations via WebSocket.
+
+<Callout type="warn">
+The Live Voice API is currently in beta. API surface may change.
+</Callout>
+
+## WebSocket Connection
+
+```typescript
+const ws = new WebSocket("wss://api.x.ai/v1/live")
+
+ws.onopen = () => {
+  // Send authentication
+  ws.send(
+    JSON.stringify({
+      type: "auth",
+      api_key: process.env.XAI_API_KEY,
+    })
+  )
+
+  // Configure session
+  ws.send(
+    JSON.stringify({
+      type: "session.update",
+      session: {
+        model: "grok-3-live",
+        voice: "alloy",
+        turn_detection: {
+          type: "server_vad",
+          threshold: 0.5,
+        },
+      },
+    })
+  )
+}
+```
+
+## Sending Audio
+
+```typescript
+// Send audio chunks as base64
+function sendAudioChunk(audioBuffer: ArrayBuffer) {
+  const base64 = Buffer.from(audioBuffer).toString("base64")
+  ws.send(
+    JSON.stringify({
+      type: "input_audio_buffer.append",
+      audio: base64,
+    })
+  )
+}
+
+// Commit audio when done speaking
+function commitAudio() {
+  ws.send(
+    JSON.stringify({
+      type: "input_audio_buffer.commit",
+    })
+  )
+}
+```
+
+## Receiving Responses
+
+```typescript
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data)
+
+  switch (data.type) {
+    case "response.audio.delta":
+      // Received audio chunk
+      const audioChunk = Buffer.from(data.delta, "base64")
+      playAudio(audioChunk)
+      break
+
+    case "response.audio_transcript.delta":
+      // Received transcript of assistant's speech
+      console.log("Assistant:", data.delta)
+      break
+
+    case "input_audio_buffer.speech_started":
+      // User started speaking (VAD detected)
+      break
+
+    case "input_audio_buffer.speech_stopped":
+      // User stopped speaking
+      break
+
+    case "error":
+      console.error("Error:", data.error)
+      break
+  }
+}
+```
+
+## Voice Options
+
+| Voice | Description |
+|-------|-------------|
+| `alloy` | Neutral, balanced |
+| `echo` | Warm, conversational |
+| `fable` | Expressive, dynamic |
+| `onyx` | Deep, authoritative |
+| `nova` | Bright, energetic |
+| `shimmer` | Clear, professional |
+
+## Audio Format
+
+```typescript
+// Input audio requirements
+const audioConfig = {
+  sampleRate: 24000, // 24kHz
+  channels: 1, // Mono
+  format: "pcm16", // 16-bit PCM
+}
+
+// Output audio format
+// Same as input: 24kHz mono PCM16
+```
+
+## Full Example
+
+```typescript
+import WebSocket from "ws"
+
+async function createVoiceSession() {
+  const ws = new WebSocket("wss://api.x.ai/v1/live")
+
+  return new Promise<WebSocket>((resolve, reject) => {
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify({
+          type: "auth",
+          api_key: process.env.XAI_API_KEY,
+        })
+      )
+
+      ws.send(
+        JSON.stringify({
+          type: "session.update",
+          session: {
+            model: "grok-3-live",
+            voice: "nova",
+            instructions:
+              "You are a helpful assistant. Keep responses brief and conversational.",
+            turn_detection: {
+              type: "server_vad",
+              threshold: 0.5,
+              silence_duration_ms: 500,
+            },
+          },
+        })
+      )
+
+      resolve(ws)
+    }
+
+    ws.onerror = reject
+  })
+}
+
+// Usage
+const session = await createVoiceSession()
+
+session.onmessage = (event) => {
+  const data = JSON.parse(event.data.toString())
+  // Handle messages...
+}
+```
+
+## Error Handling
+
+```typescript
+ws.onerror = (error) => {
+  console.error("WebSocket error:", error)
+}
+
+ws.onclose = (event) => {
+  if (event.code !== 1000) {
+    console.error("Unexpected close:", event.code, event.reason)
+    // Implement reconnection logic
+  }
+}
+```

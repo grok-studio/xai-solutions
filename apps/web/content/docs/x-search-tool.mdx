@@ -1,0 +1,187 @@
+---
+title: X Search Tool
+description: Using Grok's x_search function for real-time X data
+icon: Search
+---
+
+## What is x_search?
+
+Grok has a built-in `x_search` tool that allows it to search X (Twitter) in real-time during conversations. This is unique to Grok and enables it to provide current information from X.
+
+## Enabling x_search
+
+When using the Grok API, you can enable the `x_search` tool:
+
+```typescript
+import OpenAI from "openai"
+
+const client = new OpenAI({
+  apiKey: process.env.XAI_API_KEY,
+  baseURL: "https://api.x.ai/v1",
+})
+
+const response = await client.chat.completions.create({
+  model: "grok-3-latest",
+  messages: [
+    {
+      role: "user",
+      content: "What are people saying about TypeScript 5.0 on X right now?",
+    },
+  ],
+  tools: [
+    {
+      type: "function",
+      function: {
+        name: "x_search",
+        description: "Search X (Twitter) for real-time posts and discussions",
+        parameters: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description: "Search query for X",
+            },
+          },
+          required: ["query"],
+        },
+      },
+    },
+  ],
+})
+```
+
+## How Grok Uses x_search
+
+When Grok determines that real-time X data would be helpful, it:
+
+1. Formulates a search query based on the user's question
+2. Calls `x_search` internally
+3. Retrieves and processes recent posts
+4. Synthesizes the information into a response
+
+<Callout type="info">
+The x_search tool is Grok's native capability. You don't need to implement the search logic; Grok handles it automatically.
+</Callout>
+
+## Example Prompts
+
+Prompts that typically trigger x_search:
+
+```typescript
+const prompts = [
+  "What's trending on X about AI right now?",
+  "What are developers saying about the new React update?",
+  "Find recent discussions about startup funding on X",
+  "What's the sentiment around Tesla stock on X today?",
+  "Show me what people are posting about the NBA finals",
+]
+```
+
+## Streaming with x_search
+
+```typescript
+const stream = await client.chat.completions.create({
+  model: "grok-3-latest",
+  messages: [
+    {
+      role: "user",
+      content: "What are the latest posts about Bun.js on X?",
+    },
+  ],
+  tools: [
+    {
+      type: "function",
+      function: {
+        name: "x_search",
+        description: "Search X for real-time posts",
+        parameters: {
+          type: "object",
+          properties: {
+            query: { type: "string" },
+          },
+          required: ["query"],
+        },
+      },
+    },
+  ],
+  stream: true,
+})
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content
+  if (content) {
+    process.stdout.write(content)
+  }
+
+  // Handle tool calls in stream
+  const toolCalls = chunk.choices[0]?.delta?.tool_calls
+  if (toolCalls) {
+    for (const tc of toolCalls) {
+      console.log("Tool call:", tc.function?.name)
+    }
+  }
+}
+```
+
+## Combining with Other Tools
+
+You can combine x_search with your own tools:
+
+```typescript
+const tools = [
+  {
+    type: "function" as const,
+    function: {
+      name: "x_search",
+      description: "Search X for real-time posts",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string" },
+        },
+        required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_stock_price",
+      description: "Get current stock price",
+      parameters: {
+        type: "object",
+        properties: {
+          symbol: { type: "string" },
+        },
+        required: ["symbol"],
+      },
+    },
+  },
+]
+
+const response = await client.chat.completions.create({
+  model: "grok-3-latest",
+  messages: [
+    {
+      role: "user",
+      content:
+        "What's NVDA stock price and what are people saying about Nvidia on X?",
+    },
+  ],
+  tools,
+})
+```
+
+## Best Practices
+
+1. **Be specific** - Clear queries yield better search results
+2. **Mention X explicitly** - Helps Grok know to use x_search
+3. **Ask for recent data** - "right now", "today", "latest" signals real-time need
+4. **Combine with analysis** - Ask Grok to summarize sentiment or key themes
+
+## Limitations
+
+- Results depend on X's real-time data availability
+- Search depth may vary based on query complexity
+- Rate limits apply to API calls
+- Not all X content is searchable (private accounts, etc.)

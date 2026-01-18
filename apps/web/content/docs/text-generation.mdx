@@ -1,0 +1,130 @@
+---
+title: Text Generation
+description: Chat completions, streaming, and function calling with Grok
+icon: MessageSquare
+---
+
+## Basic Chat Completion
+
+```typescript
+import OpenAI from "openai"
+
+const client = new OpenAI({
+  apiKey: process.env.XAI_API_KEY,
+  baseURL: "https://api.x.ai/v1",
+})
+
+const completion = await client.chat.completions.create({
+  model: "grok-3-latest",
+  messages: [
+    { role: "system", content: "You are a helpful assistant." },
+    { role: "user", content: "What is the capital of France?" },
+  ],
+})
+
+console.log(completion.choices[0].message.content)
+```
+
+## Streaming Responses
+
+```typescript
+const stream = await client.chat.completions.create({
+  model: "grok-3-latest",
+  messages: [{ role: "user", content: "Write a haiku about code." }],
+  stream: true,
+})
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content
+  if (content) {
+    process.stdout.write(content)
+  }
+}
+```
+
+## Available Models
+
+| Model | Description | Context Window |
+|-------|-------------|----------------|
+| `grok-3-latest` | Latest Grok 3 model | 131,072 tokens |
+| `grok-3-fast-latest` | Faster, lighter Grok 3 | 131,072 tokens |
+| `grok-2-latest` | Previous generation | 131,072 tokens |
+| `grok-2-vision-latest` | Vision-capable model | 32,768 tokens |
+
+## Function Calling
+
+Grok supports OpenAI-compatible function calling:
+
+```typescript
+const tools = [
+  {
+    type: "function" as const,
+    function: {
+      name: "get_weather",
+      description: "Get current weather for a location",
+      parameters: {
+        type: "object",
+        properties: {
+          location: { type: "string", description: "City name" },
+          unit: { type: "string", enum: ["celsius", "fahrenheit"] },
+        },
+        required: ["location"],
+      },
+    },
+  },
+]
+
+const response = await client.chat.completions.create({
+  model: "grok-3-latest",
+  messages: [{ role: "user", content: "What's the weather in Tokyo?" }],
+  tools,
+  tool_choice: "auto",
+})
+
+const toolCall = response.choices[0].message.tool_calls?.[0]
+if (toolCall) {
+  const args = JSON.parse(toolCall.function.arguments)
+  console.log("Function:", toolCall.function.name)
+  console.log("Arguments:", args)
+}
+```
+
+## System Prompts
+
+```typescript
+const messages = [
+  {
+    role: "system" as const,
+    content: `You are a TypeScript expert. When providing code:
+- Use modern ES2022+ syntax
+- Include proper type annotations
+- Follow best practices`,
+  },
+  { role: "user" as const, content: "How do I read a file in Node.js?" },
+]
+```
+
+## Error Handling
+
+```typescript
+import OpenAI from "openai"
+
+try {
+  const completion = await client.chat.completions.create({
+    model: "grok-3-latest",
+    messages: [{ role: "user", content: "Hello" }],
+  })
+} catch (error) {
+  if (error instanceof OpenAI.APIError) {
+    console.error("Status:", error.status)
+    console.error("Message:", error.message)
+
+    if (error.status === 429) {
+      // Rate limited - implement backoff
+    } else if (error.status === 401) {
+      // Invalid API key
+    }
+  }
+  throw error
+}
+```

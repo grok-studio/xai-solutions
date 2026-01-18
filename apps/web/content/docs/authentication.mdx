@@ -1,0 +1,74 @@
+---
+title: Authentication
+description: API keys and environment configuration for xAI APIs
+icon: Key
+---
+
+## xAI API Key
+
+Get your API key from the [xAI Console](https://console.x.ai/).
+
+### Environment Variables
+
+```bash
+# .env
+XAI_API_KEY=xai-your-key-here
+```
+
+### TypeScript Configuration
+
+```typescript
+import OpenAI from "openai"
+
+const client = new OpenAI({
+  apiKey: process.env.XAI_API_KEY,
+  baseURL: "https://api.x.ai/v1",
+})
+```
+
+<Callout type="info">
+xAI's API is OpenAI-compatible. Use the official `openai` package with the xAI base URL.
+</Callout>
+
+## X API Authentication
+
+For X (Twitter) API access, you need:
+
+1. **API Key & Secret** - From the [X Developer Portal](https://developer.x.com/)
+2. **Bearer Token** - For app-only authentication
+3. **OAuth 2.0** - For user-context authentication
+
+### Environment Variables
+
+```bash
+# .env
+X_API_KEY=your-api-key
+X_API_SECRET=your-api-secret
+X_BEARER_TOKEN=your-bearer-token
+
+# For OAuth 2.0 PKCE
+X_CLIENT_ID=your-client-id
+```
+
+### Basic Setup
+
+```typescript
+// App-only authentication (read-only public data)
+const headers = {
+  Authorization: `Bearer ${process.env.X_BEARER_TOKEN}`,
+}
+
+// User-context authentication (for posting, DMs, etc.)
+// See X API OAuth guide for OAuth 2.0 PKCE flow
+```
+
+## Security Best Practices
+
+<Callout type="warn">
+Never commit API keys to version control. Use `.env` files and ensure they're in `.gitignore`.
+</Callout>
+
+1. **Use environment variables** - Never hardcode keys
+2. **Rotate keys regularly** - Especially if compromised
+3. **Use minimal scopes** - Request only needed permissions
+4. **Monitor usage** - Check the xAI console for anomalies

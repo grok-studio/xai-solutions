@@ -1,0 +1,241 @@
+---
+title: X API OAuth
+description: OAuth 2.0 PKCE authentication for user-context operations
+icon: Shield
+---
+
+## OAuth 2.0 PKCE Flow
+
+X API requires OAuth 2.0 with PKCE for user-context operations (posting tweets, DMs, etc.).
+
+## 1. Generate PKCE Challenge
+
+```typescript
+import crypto from "crypto"
+
+function generatePKCE() {
+  // Generate code verifier (43-128 characters)
+  const codeVerifier = crypto.randomBytes(32).toString("base64url")
+
+  // Generate code challenge (SHA256 hash of verifier)
+  const codeChallenge = crypto
+    .createHash("sha256")
+    .update(codeVerifier)
+    .digest("base64url")
+
+  return { codeVerifier, codeChallenge }
+}
+
+const { codeVerifier, codeChallenge } = generatePKCE()
+// Store codeVerifier in session for later use
+```
+
+## 2. Authorization URL
+
+```typescript
+function getAuthorizationUrl(
+  clientId: string,
+  redirectUri: string,
+  codeChallenge: string,
+  state: string
+) {
+  const params = new URLSearchParams({
+    response_type: "code",
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    scope: "tweet.read tweet.write users.read offline.access",
+    state,
+    code_challenge: codeChallenge,
+    code_challenge_method: "S256",
+  })
+
+  return `https://twitter.com/i/oauth2/authorize?${params}`
+}
+
+// Redirect user to this URL
+const authUrl = getAuthorizationUrl(
+  process.env.X_CLIENT_ID!,
+  "http://localhost:3000/callback",
+  codeChallenge,
+  "random-state-string"
+)
+```
+
+## 3. Handle Callback
+
+```typescript
+// User redirected back with ?code=...&state=...
+async function handleCallback(
+  code: string,
+  codeVerifier: string,
+  redirectUri: string
+) {
+  const response = await fetch("https://api.twitter.com/2/oauth2/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      code,
+      grant_type: "authorization_code",
+      client_id: process.env.X_CLIENT_ID!,
+      redirect_uri: redirectUri,
+      code_verifier: codeVerifier,
+    }),
+  })
+
+  return response.json()
+}
+
+// Response contains:
+// {
+//   token_type: "bearer",
+//   access_token: "...",
+//   refresh_token: "...",
+//   expires_in: 7200,
+//   scope: "tweet.read tweet.write users.read offline.access"
+// }
+```
+
+## 4. Refresh Token
+
+```typescript
+async function refreshAccessToken(refreshToken: string) {
+  const response = await fetch("https://api.twitter.com/2/oauth2/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: process.env.X_CLIENT_ID!,
+    }),
+  })
+
+  return response.json()
+}
+```
+
+## Available Scopes
+
+| Scope | Description |
+|-------|-------------|
+| `tweet.read` | Read tweets |
+| `tweet.write` | Post and delete tweets |
+| `tweet.moderate.write` | Hide/unhide replies |
+| `users.read` | Read user info |
+| `follows.read` | Read following/followers |
+| `follows.write` | Follow/unfollow users |
+| `offline.access` | Get refresh token |
+| `space.read` | Read Spaces |
+| `mute.read` | Read muted accounts |
+| `mute.write` | Mute/unmute accounts |
+| `like.read` | Read liked tweets |
+| `like.write` | Like/unlike tweets |
+| `list.read` | Read lists |
+| `list.write` | Create/manage lists |
+| `block.read` | Read blocked accounts |
+| `block.write` | Block/unblock accounts |
+| `bookmark.read` | Read bookmarks |
+| `bookmark.write` | Add/remove bookmarks |
+| `dm.read` | Read direct messages |
+| `dm.write` | Send direct messages |
+
+## Complete Example
+
+```typescript
+import crypto from "crypto"
+import { serve } from "bun"
+
+// In-memory session store (use Redis in production)
+const sessions = new Map<string, { codeVerifier: string; state: string }>()
+
+const CLIENT_ID = process.env.X_CLIENT_ID!
+const REDIRECT_URI = "http://localhost:3000/callback"
+
+serve({
+  port: 3000,
+  async fetch(req) {
+    const url = new URL(req.url)
+
+    if (url.pathname === "/login") {
+      const { codeVerifier, codeChallenge } = generatePKCE()
+      const state = crypto.randomBytes(16).toString("hex")
+
+      sessions.set(state, { codeVerifier, state })
+
+      const authUrl = getAuthorizationUrl(
+        CLIENT_ID,
+        REDIRECT_URI,
+        codeChallenge,
+        state
+      )
+
+      return Response.redirect(authUrl)
+    }
+
+    if (url.pathname === "/callback") {
+      const code = url.searchParams.get("code")
+      const state = url.searchParams.get("state")
+
+      if (!code || !state) {
+        return new Response("Missing code or state", { status: 400 })
+      }
+
+      const session = sessions.get(state)
+      if (!session) {
+        return new Response("Invalid state", { status: 400 })
+      }
+
+      const tokens = await handleCallback(
+        code,
+        session.codeVerifier,
+        REDIRECT_URI
+      )
+
+      sessions.delete(state)
+
+      return Response.json(tokens)
+    }
+
+    return new Response("Not found", { status: 404 })
+  },
+})
+```
+
+## Token Storage
+
+<Callout type="warn">
+Store tokens securely. Use encrypted storage in production; never expose tokens to client-side code.
+</Callout>
+
+```typescript
+interface TokenData {
+  accessToken: string
+  refreshToken: string
+  expiresAt: number
+}
+
+class TokenManager {
+  private tokens: Map<string, TokenData> = new Map()
+
+  async getValidToken(userId: string): Promise<string> {
+    const data = this.tokens.get(userId)
+    if (!data) throw new Error("No token for user")
+
+    // Refresh if expiring within 5 minutes
+    if (Date.now() > data.expiresAt - 5 * 60 * 1000) {
+      const newTokens = await refreshAccessToken(data.refreshToken)
+      this.tokens.set(userId, {
+        accessToken: newTokens.access_token,
+        refreshToken: newTokens.refresh_token,
+        expiresAt: Date.now() + newTokens.expires_in * 1000,
+      })
+      return newTokens.access_token
+    }
+
+    return data.accessToken
+  }
+}
+```

@@ -1,0 +1,129 @@
+---
+title: Image Generation
+description: Generate images with Aurora (Grok's image model)
+icon: Image
+---
+
+## Aurora Image Generation
+
+xAI's Aurora model generates images via the OpenAI-compatible images API.
+
+```typescript
+import OpenAI from "openai"
+
+const client = new OpenAI({
+  apiKey: process.env.XAI_API_KEY,
+  baseURL: "https://api.x.ai/v1",
+})
+
+const response = await client.images.generate({
+  model: "grok-2-image",
+  prompt: "A futuristic cityscape at sunset with flying cars",
+  n: 1,
+  size: "1024x1024",
+})
+
+console.log(response.data[0].url)
+```
+
+## Image Sizes
+
+| Size | Description |
+|------|-------------|
+| `1024x1024` | Square format (default) |
+| `1024x768` | Landscape 4:3 |
+| `768x1024` | Portrait 4:3 |
+| `1536x1024` | Landscape 3:2 |
+| `1024x1536` | Portrait 3:2 |
+
+## Response Formats
+
+```typescript
+// URL response (default)
+const urlResponse = await client.images.generate({
+  model: "grok-2-image",
+  prompt: "A red apple on a white table",
+  response_format: "url",
+})
+
+// Base64 response
+const b64Response = await client.images.generate({
+  model: "grok-2-image",
+  prompt: "A red apple on a white table",
+  response_format: "b64_json",
+})
+
+// Save base64 to file
+import { writeFileSync } from "fs"
+const imageData = b64Response.data[0].b64_json
+writeFileSync("apple.png", Buffer.from(imageData!, "base64"))
+```
+
+## Multiple Images
+
+```typescript
+const response = await client.images.generate({
+  model: "grok-2-image",
+  prompt: "A cute robot mascot",
+  n: 4, // Generate 4 variations
+})
+
+for (const [index, image] of response.data.entries()) {
+  console.log(`Image ${index + 1}: ${image.url}`)
+}
+```
+
+## Prompt Engineering Tips
+
+<Callout type="info">
+Aurora responds well to detailed, descriptive prompts with style specifications.
+</Callout>
+
+**Good prompt structure:**
+```
+[Subject] [Action/Pose] [Setting/Background] [Style] [Lighting] [Details]
+```
+
+**Example:**
+```typescript
+const prompt = `
+A majestic owl perched on an ancient oak branch,
+forest background with morning mist,
+digital art style, volumetric lighting,
+highly detailed feathers, 8K resolution
+`.trim()
+```
+
+## Error Handling
+
+```typescript
+try {
+  const response = await client.images.generate({
+    model: "grok-2-image",
+    prompt: userPrompt,
+  })
+} catch (error) {
+  if (error instanceof OpenAI.APIError) {
+    if (error.status === 400) {
+      // Content policy violation or invalid prompt
+      console.error("Invalid prompt:", error.message)
+    } else if (error.status === 429) {
+      // Rate limited
+      console.error("Rate limited, retry after delay")
+    }
+  }
+  throw error
+}
+```
+
+## Rate Limits
+
+Aurora has separate rate limits from text generation:
+
+- **Requests per minute**: Check your plan limits
+- **Images per request**: Maximum 4 (n parameter)
+- **Concurrent requests**: Plan-dependent
+
+<Callout type="warn">
+Generated image URLs expire after a short period. Download and store images if needed for later use.
+</Callout>
