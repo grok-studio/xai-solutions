@@ -9,6 +9,7 @@ import { baseOptions } from "@/lib/layout.shared"
 import { useFumadocsLoader } from "fumadocs-core/source/client"
 import { LLMCopyButton } from "@/components/llm-copy-button"
 import { ViewOptions } from "@/components/view-options"
+import { PageActionsProvider, usePageActions } from "@/lib/page-actions-context"
 
 export const Route = createFileRoute("/docs/$")({
   component: Page,
@@ -37,10 +38,20 @@ const serverLoader = createServerFn({
 
 const clientLoader = browserCollections.docs.createClientLoader({
   component({ toc, frontmatter, default: MDX }) {
+    const { markdownUrl, githubUrl } = usePageActions()
+
     return (
       <DocsPage toc={toc}>
-        <DocsTitle>{frontmatter.title}</DocsTitle>
+        {/* Header row with title and action buttons */}
+        <div className="flex items-start justify-between gap-4 not-prose">
+          <DocsTitle>{frontmatter.title}</DocsTitle>
+          <div className="flex items-center gap-2 shrink-0 mt-1">
+            <LLMCopyButton markdownUrl={markdownUrl} />
+            <ViewOptions markdownUrl={markdownUrl} githubUrl={githubUrl} />
+          </div>
+        </div>
         <DocsDescription>{frontmatter.description}</DocsDescription>
+
         <DocsBody>
           <MDX
             components={{
@@ -64,11 +75,9 @@ function Page() {
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
-      <div className="flex items-center justify-end gap-2 mb-4 -mt-2">
-        <LLMCopyButton markdownUrl={markdownUrl} />
-        <ViewOptions markdownUrl={markdownUrl} githubUrl={githubUrl} />
-      </div>
-      <Content />
+      <PageActionsProvider value={{ markdownUrl, githubUrl }}>
+        <Content />
+      </PageActionsProvider>
     </DocsLayout>
   )
 }
