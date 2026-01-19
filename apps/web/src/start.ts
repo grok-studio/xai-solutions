@@ -1,29 +1,30 @@
-import { createStart, createMiddleware } from "@tanstack/react-start"
-import { redirect } from "@tanstack/react-router"
+import { createStart, createMiddleware } from "@tanstack/react-start";
+import { redirect } from "@tanstack/react-router";
+import { securityMiddleware } from "./middlewares/security";
 
 /**
  * Rewrites /docs/{path}.mdx → /llms.mdx/docs/{path}
  * This allows users to access raw MDX content by appending .mdx to any docs URL
  */
 function rewriteMdxPath(pathname: string): string | null {
-  const match = pathname.match(/^\/docs\/(.+)\.mdx$/)
+  const match = pathname.match(/^\/docs\/(.+)\.mdx$/);
   if (match) {
-    return `/llms.mdx/docs/${match[1]}`
+    return `/llms.mdx/docs/${match[1]}`;
   }
-  return null
+  return null;
 }
 
 const llmMiddleware = createMiddleware().server(({ next, request }) => {
-  const url = new URL(request.url)
-  const rewrittenPath = rewriteMdxPath(url.pathname)
+  const url = new URL(request.url);
+  const rewrittenPath = rewriteMdxPath(url.pathname);
 
   if (rewrittenPath) {
-    throw redirect({ href: rewrittenPath })
+    throw redirect({ href: rewrittenPath });
   }
 
-  return next()
-})
+  return next();
+});
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [llmMiddleware],
-}))
+  requestMiddleware: [llmMiddleware, securityMiddleware],
+}));

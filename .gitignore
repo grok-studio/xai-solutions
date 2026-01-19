@@ -32,6 +32,7 @@ coverage/
 
 # Alchemy
 .alchemy/
+.wrangler/
 
 # Reference directories (created by setup command)
 .reference/

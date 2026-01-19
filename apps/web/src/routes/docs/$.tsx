@@ -69,8 +69,8 @@ function Page() {
   const { pageTree } = useFumadocsLoader(data)
   const Content = clientLoader.getComponent(data.path)
 
-  // Construct URLs for page actions
-  const markdownUrl = `${data.url}.mdx`
+  // Construct URLs for page actions - use direct route to avoid redirect issues
+  const markdownUrl = `/llms.mdx${data.url}`
   const githubUrl = `https://github.com/adamferguson/xai-solutions/blob/main/apps/web/content${data.url}.mdx`
 
   return (
