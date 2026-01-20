@@ -1,6 +1,6 @@
-import { createFileRoute, notFound } from "@tanstack/react-router"
-import { source } from "@/lib/source"
 import { getLLMText } from "@/lib/get-llm-text"
+import { source } from "@/lib/source"
+import { createFileRoute, notFound } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/llms.mdx/docs/$")({
   server: {

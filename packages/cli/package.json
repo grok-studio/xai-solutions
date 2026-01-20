@@ -17,10 +17,7 @@
     "prepublishOnly": "bun run build:artifacts",
     "dev": "bun src/cli.ts"
   },
-  "files": [
-    "bin.js",
-    "dist"
-  ],
+  "files": ["bin.js", "dist"],
   "publishConfig": {
     "access": "public"
   },
@@ -40,16 +37,7 @@
     "bun-types": "^1.3.5",
     "typescript": "^5.7.3"
   },
-  "keywords": [
-    "xai",
-    "grok",
-    "x-api",
-    "twitter",
-    "typescript",
-    "best-practices",
-    "cli",
-    "docs"
-  ],
+  "keywords": ["xai", "grok", "x-api", "twitter", "typescript", "best-practices", "cli", "docs"],
   "author": "Adam Ferguson",
   "license": "MIT",
   "repository": {

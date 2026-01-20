@@ -1,6 +1,6 @@
 "use client"
+import { Check, Copy } from "lucide-react"
 import { useState } from "react"
-import { Copy, Check } from "lucide-react"
 
 interface LLMCopyButtonProps {
   markdownUrl: string
@@ -23,6 +23,7 @@ export function LLMCopyButton({ markdownUrl }: LLMCopyButtonProps) {
 
   return (
     <button
+      type="button"
       onClick={handleCopy}
       className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-fd-border bg-fd-background hover:bg-fd-accent transition-colors"
     >

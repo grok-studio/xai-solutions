@@ -18,14 +18,11 @@ async function getUserByUsername(username: string) {
     "user.fields": "id,name,username,description,public_metrics",
   })
 
-  const response = await fetch(
-    `https://api.twitter.com/2/users/by/username/${username}?${params}`,
-    {
-      headers: {
-        Authorization: `Bearer ${BEARER_TOKEN}`,
-      },
-    }
-  )
+  const response = await fetch(`https://api.twitter.com/2/users/by/username/${username}?${params}`, {
+    headers: {
+      Authorization: `Bearer ${BEARER_TOKEN}`,
+    },
+  })
 
   if (!response.ok) {
     throw new Error(`Failed to fetch user: ${response.status} ${response.statusText}`)
@@ -34,20 +31,17 @@ async function getUserByUsername(username: string) {
   return response.json()
 }
 
-async function getUserTimeline(userId: string, maxResults: number = 5) {
+async function getUserTimeline(userId: string, maxResults = 5) {
   const params = new URLSearchParams({
     max_results: maxResults.toString(),
     "tweet.fields": "created_at,public_metrics,author_id",
   })
 
-  const response = await fetch(
-    `https://api.twitter.com/2/users/${userId}/tweets?${params}`,
-    {
-      headers: {
-        Authorization: `Bearer ${BEARER_TOKEN}`,
-      },
-    }
-  )
+  const response = await fetch(`https://api.twitter.com/2/users/${userId}/tweets?${params}`, {
+    headers: {
+      Authorization: `Bearer ${BEARER_TOKEN}`,
+    },
+  })
 
   if (!response.ok) {
     throw new Error(`Failed to fetch timeline: ${response.status} ${response.statusText}`)

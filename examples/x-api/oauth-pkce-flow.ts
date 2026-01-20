@@ -9,7 +9,7 @@
  * Visit http://localhost:3000/login to start the OAuth flow
  */
 
-import crypto from "crypto"
+import crypto from "node:crypto"
 
 const CLIENT_ID = process.env.X_CLIENT_ID
 const REDIRECT_URI = "http://localhost:3000/callback"
@@ -69,7 +69,7 @@ async function exchangeCodeForTokens(code: string, codeVerifier: string) {
 }
 
 // Using Bun's built-in server
-const server = Bun.serve({
+const _server = Bun.serve({
   port: 3000,
   async fetch(req) {
     const url = new URL(req.url)
@@ -158,7 +158,7 @@ const server = Bun.serve({
 </body>
 </html>
 `,
-        { headers: { "Content-Type": "text/html" } }
+        { headers: { "Content-Type": "text/html" } },
       )
     }
 

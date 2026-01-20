@@ -5,9 +5,9 @@ import { BunContext, BunRuntime } from "@effect/platform-bun"
 import { Console, Effect, Layer, Option, pipe } from "effect"
 import pc from "picocolors"
 import pkg from "../package.json" with { type: "json" }
-import { DOC_LOOKUP, DOCS } from "./docs-manifest"
-import { GitService, XAISolutionsService } from "./xai-solutions-service"
+import { DOCS, DOC_LOOKUP } from "./docs-manifest"
 import { BrowserService, IssueService, type OpenIssueCategory } from "./open-issue-service"
+import { GitService, XAISolutionsService } from "./xai-solutions-service"
 
 const CLI_NAME = "xai-solutions"
 const CLI_VERSION = pkg.version

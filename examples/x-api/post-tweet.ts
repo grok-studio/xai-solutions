@@ -27,7 +27,7 @@ async function postTweet(text: string, accessToken: string) {
   return response.json()
 }
 
-async function replyToTweet(text: string, replyToId: string, accessToken: string) {
+async function _replyToTweet(text: string, replyToId: string, accessToken: string) {
   const response = await fetch("https://api.twitter.com/2/tweets", {
     method: "POST",
     headers: {
@@ -54,7 +54,7 @@ async function main() {
   const tweetText = process.argv[2]
 
   if (!tweetText) {
-    console.error("Usage: bun examples/x-api/post-tweet.ts \"Your tweet text\"")
+    console.error('Usage: bun examples/x-api/post-tweet.ts "Your tweet text"')
     process.exit(1)
   }
 

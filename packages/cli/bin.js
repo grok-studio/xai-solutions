@@ -31,15 +31,14 @@ if (fs.existsSync(srcPath) && (!binPath || !fs.existsSync(binPath))) {
 // Production mode: use prebuilt binary
 if (!binaryName) {
   console.error(
-    `[xai-solutions] Unsupported platform: ${PLATFORM_ARCH}. ` + "Please open an issue with your OS/CPU details.",
+    `[xai-solutions] Unsupported platform: ${PLATFORM_ARCH}. Please open an issue with your OS/CPU details.`,
   )
   process.exit(1)
 }
 
 if (!fs.existsSync(binPath)) {
   console.error(
-    `[xai-solutions] Prebuilt binary not found for ${PLATFORM_ARCH}. ` +
-      "Try reinstalling, or open an issue if the problem persists.",
+    `[xai-solutions] Prebuilt binary not found for ${PLATFORM_ARCH}. Try reinstalling, or open an issue if the problem persists.`,
   )
   process.exit(1)
 }

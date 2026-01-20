@@ -58,7 +58,9 @@ export class BrowserService extends Context.Tag("@cli/BrowserService")<
 export class IssueService extends Context.Tag("@cli/IssueService")<
   IssueService,
   {
-    readonly open: (input: OpenIssueInput) => Effect.Effect<OpenIssueResult, OpenIssueError, CommandExecutor.CommandExecutor>
+    readonly open: (
+      input: OpenIssueInput,
+    ) => Effect.Effect<OpenIssueResult, OpenIssueError, CommandExecutor.CommandExecutor>
   }
 >() {
   static readonly layer = Layer.effect(

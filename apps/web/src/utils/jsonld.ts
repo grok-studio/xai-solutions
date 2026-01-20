@@ -6,21 +6,21 @@
  * @see https://developers.google.com/search/docs/appearance/structured-data
  */
 
-const SITE_URL = "https://buildwithx.dev";
-const SITE_NAME = "Build with X";
+const SITE_URL = "https://buildwithx.dev"
+const SITE_NAME = "Build with X"
 const SITE_DESCRIPTION =
-  "xAI and X API documentation, LLM-optimized markdown guides, and a CLI for developers building with Grok models and the X platform.";
-const TWITTER_HANDLE = "adamthewilliam";
+  "xAI and X API documentation, LLM-optimized markdown guides, and a CLI for developers building with Grok models and the X platform."
+const TWITTER_HANDLE = "adamthewilliam"
 
 interface JsonLdGraph {
-  "@context": string;
-  "@graph": JsonLdNode[];
+  "@context": string
+  "@graph": JsonLdNode[]
 }
 
 interface JsonLdNode {
-  "@type": string;
-  "@id"?: string;
-  [key: string]: unknown;
+  "@type": string
+  "@id"?: string
+  [key: string]: unknown
 }
 
 /**
@@ -63,5 +63,5 @@ export function getJsonLd(): JsonLdGraph {
         },
       },
     ],
-  };
+  }
 }

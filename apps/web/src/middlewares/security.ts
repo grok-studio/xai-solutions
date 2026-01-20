@@ -1,8 +1,5 @@
-import { createMiddleware } from "@tanstack/react-start";
-import {
-  getResponseHeaders,
-  setResponseHeaders,
-} from "@tanstack/react-start/server";
+import { createMiddleware } from "@tanstack/react-start"
+import { getResponseHeaders, setResponseHeaders } from "@tanstack/react-start/server"
 
 /**
  * Get the app URL from environment variables
@@ -10,19 +7,19 @@ import {
  * Falls back to localhost for development
  */
 function _getAppUrl(): string {
-  const appUrl = process.env.VITE_APP_URL;
+  const appUrl = process.env.VITE_APP_URL
   if (appUrl) {
-    return appUrl;
+    return appUrl
   }
   // Fallback for development
-  return "http://localhost:3001";
+  return "http://localhost:3001"
 }
 
 /**
  * Check if running in production environment
  */
 function isProduction(): boolean {
-  return process.env.NODE_ENV === "production";
+  return process.env.NODE_ENV === "production"
 }
 
 /**
@@ -35,9 +32,9 @@ function isProduction(): boolean {
  */
 export const securityMiddleware = createMiddleware().server(({ next }) => {
   // Generate a unique nonce for this request (used for CSP script-src)
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64")
 
-  const isProd = isProduction();
+  const isProd = isProduction()
 
   // Content Security Policy directives
   const cspDirectives = [
@@ -95,60 +92,54 @@ export const securityMiddleware = createMiddleware().server(({ next }) => {
     isProd && "upgrade-insecure-requests",
   ]
     .filter(Boolean)
-    .join("; ");
+    .join("; ")
 
   // Clean up any extra whitespace in CSP
-  const contentSecurityPolicy = cspDirectives.replace(/\s{2,}/g, " ").trim();
+  const contentSecurityPolicy = cspDirectives.replace(/\s{2,}/g, " ").trim()
 
-  const headers = getResponseHeaders();
+  const headers = getResponseHeaders()
 
   // === Content Security Policy ===
-  headers.set("Content-Security-Policy", contentSecurityPolicy);
+  headers.set("Content-Security-Policy", contentSecurityPolicy)
 
   // === Transport Security ===
   // HSTS: Force HTTPS for 1 year, include subdomains, enable preload
   // Note: preload requires submission to hstspreload.org
   if (isProd) {
-    headers.set(
-      "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains; preload",
-    );
+    headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
   }
 
   // === Content Type Protection ===
   // Prevent MIME type sniffing
-  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("X-Content-Type-Options", "nosniff")
 
   // === Frame Protection ===
   // X-Frame-Options: Legacy fallback for older browsers (CSP frame-ancestors is primary)
-  headers.set("X-Frame-Options", "DENY");
+  headers.set("X-Frame-Options", "DENY")
 
   // === XSS Protection ===
   // Disabled (0) per modern security guidance - browser XSS auditors are deprecated
   // and could introduce vulnerabilities. CSP is the modern replacement.
-  headers.set("X-XSS-Protection", "0");
+  headers.set("X-XSS-Protection", "0")
 
   // === Referrer Policy ===
   // Send full URL for same-origin, only origin for cross-origin
-  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
 
   // === Cross-Origin Policies ===
   // Protect against Spectre-like side-channel attacks
-  headers.set("Cross-Origin-Opener-Policy", "same-origin");
-  headers.set("Cross-Origin-Resource-Policy", "same-site");
+  headers.set("Cross-Origin-Opener-Policy", "same-origin")
+  headers.set("Cross-Origin-Resource-Policy", "same-site")
 
   // === Permissions Policy ===
   // Disable sensitive browser features not used by the app
-  headers.set(
-    "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()",
-  );
+  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()")
 
-  setResponseHeaders(headers);
+  setResponseHeaders(headers)
 
   return next({
     context: {
       nonce,
     },
-  });
-});
+  })
+})

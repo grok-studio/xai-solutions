@@ -6,40 +6,28 @@
  * @see https://ahrefs.com/seo/glossary/meta-description
  */
 
-const SITE_URL = "https://buildwithx.dev";
-const TWITTER_SITE = "@adamthewilliam";
+const SITE_URL = "https://buildwithx.dev"
+const TWITTER_SITE = "@adamthewilliam"
 
 export interface SeoOptions {
   /** Page title (50-60 chars recommended) */
-  title: string;
+  title: string
   /** Page description (150-160 chars recommended) */
-  description?: string;
+  description?: string
   /** Keywords (optional, not a ranking factor but can help) */
-  keywords?: string;
+  keywords?: string
   /** OG/Twitter image URL (1200x630px recommended) */
-  image?: string;
+  image?: string
   /** Alt text for the image (accessibility) */
-  imageAlt?: string;
+  imageAlt?: string
   /** Canonical URL path (e.g., '/gitmojis' or full URL) */
-  url?: string;
+  url?: string
   /** Override default Twitter handle */
-  twitterSite?: string;
+  twitterSite?: string
 }
 
-export const seo = ({
-  title,
-  description,
-  keywords,
-  image,
-  imageAlt,
-  url,
-  twitterSite = TWITTER_SITE,
-}: SeoOptions) => {
-  const canonicalUrl = url?.startsWith("http")
-    ? url
-    : url
-      ? `${SITE_URL}${url}`
-      : undefined;
+export const seo = ({ title, description, keywords, image, imageAlt, url, twitterSite = TWITTER_SITE }: SeoOptions) => {
+  const canonicalUrl = url?.startsWith("http") ? url : url ? `${SITE_URL}${url}` : undefined
 
   const tags: Record<string, string>[] = [
     { title },
@@ -57,14 +45,14 @@ export const seo = ({
     { name: "twitter:site", content: twitterSite },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description ?? "" },
-  ];
+  ]
 
   if (keywords) {
-    tags.push({ name: "keywords", content: keywords });
+    tags.push({ name: "keywords", content: keywords })
   }
 
   if (canonicalUrl) {
-    tags.push({ property: "og:url", content: canonicalUrl });
+    tags.push({ property: "og:url", content: canonicalUrl })
   }
 
   if (image) {
@@ -73,22 +61,19 @@ export const seo = ({
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { name: "twitter:image", content: image },
-    );
+    )
     if (imageAlt) {
-      tags.push(
-        { property: "og:image:alt", content: imageAlt },
-        { name: "twitter:image:alt", content: imageAlt },
-      );
+      tags.push({ property: "og:image:alt", content: imageAlt }, { name: "twitter:image:alt", content: imageAlt })
     }
   }
 
   return tags.filter((tag) => {
     if ("content" in tag && !tag.content) {
-      return false;
+      return false
     }
-    return true;
-  });
-};
+    return true
+  })
+}
 
 /**
  * Generate a canonical link tag for the head
@@ -100,4 +85,4 @@ export const seo = ({
 export const canonicalLink = (path: string) => ({
   rel: "canonical",
   href: path.startsWith("http") ? path : `${SITE_URL}${path}`,
-});
+})

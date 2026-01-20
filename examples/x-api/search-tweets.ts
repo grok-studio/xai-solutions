@@ -13,7 +13,7 @@ if (!BEARER_TOKEN) {
   process.exit(1)
 }
 
-async function searchTweets(query: string, maxResults: number = 10) {
+async function searchTweets(query: string, maxResults = 10) {
   const params = new URLSearchParams({
     query,
     max_results: maxResults.toString(),
@@ -40,7 +40,7 @@ async function main() {
   const query = process.argv[2]
 
   if (!query) {
-    console.error("Usage: bun examples/x-api/search-tweets.ts \"your search query\"")
+    console.error('Usage: bun examples/x-api/search-tweets.ts "your search query"')
     console.error("\nExamples:")
     console.error('  bun examples/x-api/search-tweets.ts "typescript"')
     console.error('  bun examples/x-api/search-tweets.ts "AI lang:en -is:retweet"')

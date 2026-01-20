@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test"
-import { readdir, readFile } from "fs/promises"
-import { join } from "path"
+import { describe, expect, test } from "bun:test"
+import { readFile, readdir } from "node:fs/promises"
+import { join } from "node:path"
 
 const EXAMPLES_DIR = join(import.meta.dir, "../examples")
 

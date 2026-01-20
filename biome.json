@@ -35,12 +35,6 @@
     }
   },
   "files": {
-    "ignore": [
-      "node_modules",
-      "dist",
-      ".output",
-      ".source",
-      "*.mdx"
-    ]
+    "ignore": ["node_modules", "dist", ".output", ".source", "*.mdx", "**/routeTree.gen.ts"]
   }
 }

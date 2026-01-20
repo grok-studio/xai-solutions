@@ -39,7 +39,7 @@ const tools: OpenAI.ChatCompletionTool[] = [
 ]
 
 // Simulated weather function
-function getWeather(location: string, unit: string = "celsius"): string {
+function getWeather(location: string, unit = "celsius"): string {
   // In a real app, this would call a weather API
   const temp = unit === "celsius" ? "22°C" : "72°F"
   return `Weather in ${location}: ${temp}, partly cloudy`

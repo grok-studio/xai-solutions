@@ -1,17 +1,14 @@
-import alchemy from "alchemy";
-import { TanStackStart } from "alchemy/cloudflare";
-import { CloudflareStateStore } from "alchemy/state";
-import { config } from "dotenv";
+import alchemy from "alchemy"
+import { TanStackStart } from "alchemy/cloudflare"
+import { CloudflareStateStore } from "alchemy/state"
+import { config } from "dotenv"
 
-config({ path: "./.env" });
+config({ path: "./.env" })
 
 const app = await alchemy("buildwithx-web-app", {
   password: process.env.ALCHEMY_PASSWORD,
-  stateStore:
-    process.env.CI || process.env.GITHUB_ACTIONS
-      ? (scope) => new CloudflareStateStore(scope)
-      : undefined,
-});
+  stateStore: process.env.CI || process.env.GITHUB_ACTIONS ? (scope) => new CloudflareStateStore(scope) : undefined,
+})
 
 export const web = await TanStackStart("buildwithx-web-app", {
   name: "buildwithx-web-app",
@@ -23,8 +20,8 @@ export const web = await TanStackStart("buildwithx-web-app", {
     command: "bun run dev",
   },
   domains: ["buildwithx.dev"],
-});
+})
 
-console.log({ url: web.url });
+console.log({ url: web.url })
 
-await app.finalize();
+await app.finalize()

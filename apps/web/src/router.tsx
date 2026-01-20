@@ -1,7 +1,7 @@
-import { createRouter as createTanStackRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
-import { NotFound } from "@/components/not-found";
-import { getCspNonce } from "./functions/get-csp-nonce";
+import { NotFound } from "@/components/not-found"
+import { createRouter as createTanStackRouter } from "@tanstack/react-router"
+import { getCspNonce } from "./functions/get-csp-nonce"
+import { routeTree } from "./routeTree.gen"
 
 export function getRouter() {
   return createTanStackRouter({
@@ -10,5 +10,5 @@ export function getRouter() {
     ssr: { nonce: getCspNonce() },
     scrollRestoration: true,
     defaultNotFoundComponent: NotFound,
-  });
+  })
 }
