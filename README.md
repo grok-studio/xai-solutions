@@ -1,4 +1,4 @@
-# xAI Solutions
+# Build With X
 
 Best practices and patterns for xAI's Grok API and X (Twitter) API. Built for humans and AI agents.
 
@@ -8,14 +8,14 @@ Best practices and patterns for xAI's Grok API and X (Twitter) API. Built for hu
 
 ```bash
 # List all documentation topics
-bunx xai-solutions list
+bunx build-with-x list
 
 # Show specific topic(s)
-bunx xai-solutions show text-generation
-bunx xai-solutions show x-api-basics x-api-oauth
+bunx build-with-x show text-generation
+bunx build-with-x show x-api-basics x-api-oauth
 
 # Set up local reference for AI agents
-bunx xai-solutions setup
+bunx build-with-x setup
 ```
 
 ### Website
@@ -54,11 +54,11 @@ Add this to your project's `CLAUDE.md` or equivalent:
 ```markdown
 ## xAI & X API Best Practices
 
-**IMPORTANT:** Always consult xai-solutions before writing xAI or X API code.
+**IMPORTANT:** Always consult build-with-x before writing xAI or X API code.
 
-1. Run `xai-solutions list` to see available guides
-2. Run `xai-solutions show <topic>...` for relevant patterns
-3. Search `.reference/xai/` for real implementations (run `xai-solutions setup` first)
+1. Run `build-with-x list` to see available guides
+2. Run `build-with-x show <topic>...` for relevant patterns
+3. Search `.reference/xai/` for real implementations (run `build-with-x setup` first)
 
 Topics: authentication, text-generation, image-generation, voice-agent, x-api-basics, x-api-oauth, x-search-tool, best-practices.
 
@@ -89,7 +89,7 @@ Open an issue for:
 - **Improvement**: Better examples or explanations
 
 ```bash
-bunx xai-solutions open-issue
+bunx build-with-x open-issue
 ```
 
 ## License

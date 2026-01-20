@@ -4,16 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-xAI Solutions is a documentation and CLI tool for xAI's Grok API and X (Twitter) API best practices. It's a Bun-powered TypeScript monorepo with a Fumadocs website and an Effect-based CLI.
+Build With X is a documentation and CLI tool for xAI's Grok API and X (Twitter) API best practices. It's a Bun-powered TypeScript monorepo with a Fumadocs website and an Effect-based CLI.
 
 ## Architecture
 
 ```
-xai-solutions/
+build-with-x/
 ├── apps/web/              # Fumadocs + TanStack Start documentation site
 │   ├── content/docs/      # MDX documentation (shared with CLI)
 │   └── src/routes/        # TanStack Start routes
-├── packages/cli/          # CLI tool (published as xai-solutions)
+├── packages/cli/          # CLI tool (published as build-with-x)
 │   └── src/               # Effect-based CLI implementation
 ├── examples/              # Runnable code examples
 │   ├── xai/              # Grok API examples
@@ -91,16 +91,16 @@ This generates `packages/cli/src/docs-manifest.ts` from `apps/web/content/docs/*
 - Keep MDX files self-contained with code examples
 - Test examples in `examples/` directory
 
-<!-- xai-solutions:start -->
+<!-- build-with-x:start -->
 ## xAI & X API Best Practices
 
-**IMPORTANT:** Always consult xai-solutions before writing xAI or X API code.
+**IMPORTANT:** Always consult build-with-x before writing xAI or X API code.
 
-1. Run `xai-solutions list` to see available guides
-2. Run `xai-solutions show <topic>...` for relevant patterns (supports multiple topics)
-3. Search `.reference/xai/` for real implementations (run `xai-solutions setup` first)
+1. Run `build-with-x list` to see available guides
+2. Run `build-with-x show <topic>...` for relevant patterns (supports multiple topics)
+3. Search `.reference/xai/` for real implementations (run `build-with-x setup` first)
 
 Topics: authentication, text-generation, image-generation, voice-agent, x-api-basics, x-api-oauth, x-search-tool, best-practices.
 
 Never guess at API patterns - check the guide first.
-<!-- xai-solutions:end -->
+<!-- build-with-x:end -->

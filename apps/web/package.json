@@ -1,5 +1,5 @@
 {
-  "name": "@xai-solutions/web",
+  "name": "@build-with-x/web",
   "private": true,
   "type": "module",
   "sideEffects": false,

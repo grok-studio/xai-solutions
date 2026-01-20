@@ -10,7 +10,7 @@ function Home() {
   return (
     <HomeLayout {...baseOptions()}>
       <div className="flex flex-col flex-1 justify-center px-4 py-16 text-center">
-        <h1 className="font-bold text-4xl mb-4">xAI Solutions</h1>
+        <h1 className="font-bold text-4xl mb-4">Build With X</h1>
         <p className="text-lg text-fd-muted-foreground mb-8 max-w-2xl mx-auto">
           Best practices and patterns for xAI's Grok API and X (Twitter) API. Built for humans and AI agents.
         </p>
@@ -23,7 +23,7 @@ function Home() {
             Read Documentation
           </Link>
           <a
-            href="https://www.npmjs.com/package/xai-solutions"
+            href="https://www.npmjs.com/package/build-with-x"
             target="_blank"
             rel="noopener noreferrer"
             className="px-6 py-3 rounded-lg border border-fd-border font-medium text-sm hover:bg-fd-accent"

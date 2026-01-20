@@ -71,7 +71,7 @@ function Page() {
 
   // Construct URLs for page actions - use direct route to avoid redirect issues
   const markdownUrl = `/llms.mdx${data.url}`
-  const githubUrl = `https://github.com/adamferguson/xai-solutions/blob/main/apps/web/content${data.url}.mdx`
+  const githubUrl = `https://github.com/adamferguson/build-with-x/blob/main/apps/web/content${data.url}.mdx`
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>

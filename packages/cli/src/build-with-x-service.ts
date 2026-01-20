@@ -2,7 +2,7 @@ import { Command, type CommandExecutor, FileSystem, Path } from "@effect/platfor
 import { Context, Effect, Layer, Schema } from "effect"
 
 const REFERENCE_DIR = ".reference"
-const XAI_REPO = "https://github.com/adamferguson/xai-solutions.git"
+const XAI_REPO = "https://github.com/adamferguson/build-with-x.git"
 
 export class SetupError extends Schema.TaggedError<SetupError>()("SetupError", {
   message: Schema.String,
@@ -84,20 +84,20 @@ export class GitService extends Context.Tag("@cli/GitService")<
   )
 }
 
-export class XAISolutionsService extends Context.Tag("@cli/XAISolutionsService")<
-  XAISolutionsService,
+export class BuildWithXService extends Context.Tag("@cli/BuildWithXService")<
+  BuildWithXService,
   {
     readonly setup: (cwd: string) => Effect.Effect<SetupResult, SetupError, CommandExecutor.CommandExecutor>
   }
 >() {
   static readonly layer = Layer.effect(
-    XAISolutionsService,
+    BuildWithXService,
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem
       const path = yield* Path.Path
       const git = yield* GitService
 
-      const setup = Effect.fn("XAISolutionsService.setup")((cwd: string) =>
+      const setup = Effect.fn("BuildWithXService.setup")((cwd: string) =>
         Effect.gen(function* () {
           const referenceDir = path.join(cwd, REFERENCE_DIR)
           const xaiDir = path.join(referenceDir, "xai")
@@ -145,7 +145,7 @@ export class XAISolutionsService extends Context.Tag("@cli/XAISolutionsService")
         ),
       )
 
-      return XAISolutionsService.of({ setup })
+      return BuildWithXService.of({ setup })
     }),
   )
 }

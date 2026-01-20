@@ -13,10 +13,10 @@ const srcPath = path.join(__dirname, "src", "cli.ts")
 const PLATFORM_ARCH = `${process.platform}-${process.arch}`
 
 const TARGET_MAP = {
-  "darwin-arm64": "xai-solutions-darwin-arm64",
-  "darwin-x64": "xai-solutions-darwin-x64",
-  "linux-x64": "xai-solutions-linux-x64",
-  "linux-arm64": "xai-solutions-linux-arm64",
+  "darwin-arm64": "build-with-x-darwin-arm64",
+  "darwin-x64": "build-with-x-darwin-x64",
+  "linux-x64": "build-with-x-linux-x64",
+  "linux-arm64": "build-with-x-linux-arm64",
 }
 
 const binaryName = TARGET_MAP[PLATFORM_ARCH]
@@ -31,14 +31,14 @@ if (fs.existsSync(srcPath) && (!binPath || !fs.existsSync(binPath))) {
 // Production mode: use prebuilt binary
 if (!binaryName) {
   console.error(
-    `[xai-solutions] Unsupported platform: ${PLATFORM_ARCH}. Please open an issue with your OS/CPU details.`,
+    `[build-with-x] Unsupported platform: ${PLATFORM_ARCH}. Please open an issue with your OS/CPU details.`,
   )
   process.exit(1)
 }
 
 if (!fs.existsSync(binPath)) {
   console.error(
-    `[xai-solutions] Prebuilt binary not found for ${PLATFORM_ARCH}. Try reinstalling, or open an issue if the problem persists.`,
+    `[build-with-x] Prebuilt binary not found for ${PLATFORM_ARCH}. Try reinstalling, or open an issue if the problem persists.`,
   )
   process.exit(1)
 }
@@ -48,7 +48,7 @@ const result = spawnSync(binPath, process.argv.slice(2), {
 })
 
 if (result.error) {
-  console.error(`[xai-solutions] Failed to start binary: ${result.error}`)
+  console.error(`[build-with-x] Failed to start binary: ${result.error}`)
   process.exit(1)
 }
 

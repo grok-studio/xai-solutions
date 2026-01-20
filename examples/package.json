@@ -1,5 +1,5 @@
 {
-  "name": "@xai-solutions/examples",
+  "name": "@build-with-x/examples",
   "private": true,
   "type": "module",
   "dependencies": {

@@ -1,7 +1,7 @@
 import { Command, type CommandExecutor } from "@effect/platform"
 import { Context, Effect, Layer, Schema } from "effect"
 
-const REPO_URL = "https://github.com/adamferguson/xai-solutions"
+const REPO_URL = "https://github.com/adamferguson/build-with-x"
 
 export type OpenIssueCategory = "Topic Request" | "Fix" | "Improvement"
 

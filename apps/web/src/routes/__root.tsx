@@ -14,7 +14,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "xAI Solutions - Best Practices for Grok & X API",
+        title: "Build With X - Best Practices for Grok & X API",
       },
       {
         name: "description",

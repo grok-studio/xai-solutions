@@ -1,10 +1,10 @@
 {
-  "name": "xai-solutions",
+  "name": "build-with-x",
   "version": "0.1.0",
   "description": "Docs + helper CLI for xAI Grok API and X API best practices",
   "type": "module",
   "bin": {
-    "xai-solutions": "./bin.js"
+    "build-with-x": "./bin.js"
   },
   "scripts": {
     "clean": "rm -rf dist",
@@ -12,7 +12,7 @@
     "build:js": "bun build src/cli.ts --target bun --outfile dist/cli.js",
     "build:targets": "bun run scripts/build-binaries.ts",
     "build:artifacts": "bun run generate:manifest && bun run clean && mkdir -p dist && bun run build:js && bun run build:targets",
-    "build:exe": "bun build src/cli.ts --compile --outfile dist/xai-solutions",
+    "build:exe": "bun build src/cli.ts --compile --outfile dist/build-with-x",
     "generate:manifest": "bun run scripts/generate-manifest.ts",
     "prepublishOnly": "bun run build:artifacts",
     "dev": "bun src/cli.ts"
@@ -42,7 +42,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/adamferguson/xai-solutions.git",
+    "url": "https://github.com/adamferguson/build-with-x.git",
     "directory": "packages/cli"
   }
 }

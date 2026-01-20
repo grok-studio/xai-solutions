@@ -7,9 +7,9 @@ import pc from "picocolors"
 import pkg from "../package.json" with { type: "json" }
 import { DOCS, DOC_LOOKUP } from "./docs-manifest"
 import { BrowserService, IssueService, type OpenIssueCategory } from "./open-issue-service"
-import { GitService, XAISolutionsService } from "./xai-solutions-service"
+import { GitService, BuildWithXService } from "./build-with-x-service"
 
-const CLI_NAME = "xai-solutions"
+const CLI_NAME = "build-with-x"
 const CLI_VERSION = pkg.version
 
 const isDocSlug = (value: string): value is keyof typeof DOC_LOOKUP => value in DOC_LOOKUP
@@ -113,7 +113,7 @@ const showDocs = (slugs: ReadonlyArray<string>) =>
   Effect.try(() => renderDocs(slugs)).pipe(Effect.flatMap((output) => Console.log(output)))
 
 const listCommand = CliCommand.make("list").pipe(
-  CliCommand.withDescription("List xAI Solutions documentation"),
+  CliCommand.withDescription("List Build With X documentation"),
   CliCommand.withHandler(() => listDocs),
 )
 
@@ -123,7 +123,7 @@ const showCommand = CliCommand.make("show", {
     Args.atLeast(1),
   ),
 }).pipe(
-  CliCommand.withDescription("Show one or more xAI Solutions docs"),
+  CliCommand.withDescription("Show one or more Build With X docs"),
   CliCommand.withHandler(({ slugs }) => showDocs(slugs)),
 )
 
@@ -138,7 +138,7 @@ const openIssueCommand = CliCommand.make("open-issue", {
     Options.optional,
   ),
 }).pipe(
-  CliCommand.withDescription("Open a pre-filled GitHub issue in the xai-solutions repo"),
+  CliCommand.withDescription("Open a pre-filled GitHub issue in the build-with-x repo"),
   CliCommand.withHandler(({ category, title, description }) =>
     Effect.gen(function* () {
       const issueService = yield* IssueService
@@ -161,7 +161,7 @@ const openIssueCommand = CliCommand.make("open-issue", {
       )
 
       yield* Console.log(
-        [pc.bold("xAI Solutions issue"), `URL: ${pc.cyan(result.issueUrl)}`].filter(Boolean).join("\n"),
+        [pc.bold("Build With X issue"), `URL: ${pc.cyan(result.issueUrl)}`].filter(Boolean).join("\n"),
       )
     }),
   ),
@@ -171,7 +171,7 @@ const setupCommand = CliCommand.make("setup").pipe(
   CliCommand.withDescription("Set up local xAI source reference for AI agents (.reference/xai/)"),
   CliCommand.withHandler(() =>
     Effect.gen(function* () {
-      const service = yield* XAISolutionsService
+      const service = yield* BuildWithXService
       const cwd = process.cwd()
 
       yield* Console.log(pc.cyan("Setting up xAI source reference..."))
@@ -197,7 +197,7 @@ const setupCommand = CliCommand.make("setup").pipe(
 
 export const cli = CliCommand.make(CLI_NAME).pipe(
   CliCommand.withDescription(
-    "xAI Solutions CLI - Browse xAI Grok API and X API best practices documentation. " +
+    "Build With X CLI - Browse xAI Grok API and X API best practices documentation. " +
       "Built for both humans and AI agents to quickly access patterns, setup guides, and code examples.",
   ),
   CliCommand.withSubcommands([listCommand, showCommand, openIssueCommand, setupCommand]),
@@ -211,7 +211,7 @@ export const runCli = (argv: ReadonlyArray<string>) =>
 
 const MainLayer = Layer.mergeAll(
   IssueService.layer.pipe(Layer.provide(BrowserService.layer)),
-  XAISolutionsService.layer.pipe(Layer.provide(GitService.layer)),
+  BuildWithXService.layer.pipe(Layer.provide(GitService.layer)),
 ).pipe(Layer.provideMerge(BunContext.layer))
 
 if (import.meta.main) {

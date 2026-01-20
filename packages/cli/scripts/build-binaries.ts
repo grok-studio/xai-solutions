@@ -1,12 +1,12 @@
 const targets = [
-  { target: "bun-darwin-arm64", outfile: "dist/xai-solutions-darwin-arm64" },
-  { target: "bun-darwin-x64", outfile: "dist/xai-solutions-darwin-x64" },
+  { target: "bun-darwin-arm64", outfile: "dist/build-with-x-darwin-arm64" },
+  { target: "bun-darwin-x64", outfile: "dist/build-with-x-darwin-x64" },
   // Baseline x64 to avoid AVX2-only builds on older Linux hosts
   {
     target: "bun-linux-x64-baseline",
-    outfile: "dist/xai-solutions-linux-x64",
+    outfile: "dist/build-with-x-linux-x64",
   },
-  { target: "bun-linux-arm64", outfile: "dist/xai-solutions-linux-arm64" },
+  { target: "bun-linux-arm64", outfile: "dist/build-with-x-linux-arm64" },
 ]
 
 for (const { target, outfile } of targets) {

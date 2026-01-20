@@ -62,7 +62,7 @@ jobs:
       - name: Create release archives
         working-directory: packages/cli/dist
         run: |
-          for binary in xai-solutions-*; do
+          for binary in build-with-x-*; do
             if [ -f "$binary" ]; then
               tar -czvf "${binary}.tar.gz" "$binary"
             fi
