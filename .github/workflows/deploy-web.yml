@@ -40,7 +40,7 @@ jobs:
 
       - name: ${{ github.event.inputs.action == 'destroy' && 'Destroy' || 'Deploy' }} Deploy Web App
         working-directory: apps/web
-        run: bun ${{ github.event.inputs.action || 'deploy' }}
+        run: bun run ${{ github.event.inputs.action || 'deploy' }}
         env:
           ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
