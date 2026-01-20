@@ -30,9 +30,7 @@ if (fs.existsSync(srcPath) && (!binPath || !fs.existsSync(binPath))) {
 
 // Production mode: use prebuilt binary
 if (!binaryName) {
-  console.error(
-    `[build-with-x] Unsupported platform: ${PLATFORM_ARCH}. Please open an issue with your OS/CPU details.`,
-  )
+  console.error(`[build-with-x] Unsupported platform: ${PLATFORM_ARCH}. Please open an issue with your OS/CPU details.`)
   process.exit(1)
 }
 

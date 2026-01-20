@@ -5,9 +5,9 @@ import { BunContext, BunRuntime } from "@effect/platform-bun"
 import { Console, Effect, Layer, Option, pipe } from "effect"
 import pc from "picocolors"
 import pkg from "../package.json" with { type: "json" }
+import { BuildWithXService, GitService } from "./build-with-x-service"
 import { DOCS, DOC_LOOKUP } from "./docs-manifest"
 import { BrowserService, IssueService, type OpenIssueCategory } from "./open-issue-service"
-import { GitService, BuildWithXService } from "./build-with-x-service"
 
 const CLI_NAME = "build-with-x"
 const CLI_VERSION = pkg.version
@@ -160,9 +160,7 @@ const openIssueCommand = CliCommand.make("open-issue", {
         ),
       )
 
-      yield* Console.log(
-        [pc.bold("Build With X issue"), `URL: ${pc.cyan(result.issueUrl)}`].filter(Boolean).join("\n"),
-      )
+      yield* Console.log([pc.bold("Build With X issue"), `URL: ${pc.cyan(result.issueUrl)}`].filter(Boolean).join("\n"))
     }),
   ),
 )
