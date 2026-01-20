@@ -38,9 +38,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build web app
-        run: bun run build:web
-
       - name: ${{ github.event.inputs.action == 'destroy' && 'Destroy' || 'Deploy' }} Deploy Web App
         working-directory: apps/web
         run: bun alchemy ${{ github.event.inputs.action || 'deploy' }} alchemy.run.ts
