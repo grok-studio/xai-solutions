@@ -1,29 +1,34 @@
-import { Command, type CommandExecutor } from "@effect/platform"
-import { Context, Effect, Layer, Schema } from "effect"
+import { Command, type CommandExecutor } from "@effect/platform";
+import { Context, Effect, Layer, Schema } from "effect";
 
-const REPO_URL = "https://github.com/adamferguson/build-with-x"
+const REPO_URL = "https://github.com/grok-studio/build-with-x";
 
-export type OpenIssueCategory = "Topic Request" | "Fix" | "Improvement"
+export type OpenIssueCategory = "Topic Request" | "Fix" | "Improvement";
 
-export class OpenIssueError extends Schema.TaggedError<OpenIssueError>()("OpenIssueError", {
-  message: Schema.String,
-  url: Schema.String,
-}) {}
+export class OpenIssueError extends Schema.TaggedError<OpenIssueError>()(
+  "OpenIssueError",
+  {
+    message: Schema.String,
+    url: Schema.String,
+  },
+) {}
 
 export type OpenIssueInput = {
-  category?: OpenIssueCategory
-  title?: string
-  description?: string
-}
+  category?: OpenIssueCategory;
+  title?: string;
+  description?: string;
+};
 
 export type OpenIssueResult = {
-  issueUrl: string
-}
+  issueUrl: string;
+};
 
 export class BrowserService extends Context.Tag("@cli/BrowserService")<
   BrowserService,
   {
-    readonly open: (url: string) => Effect.Effect<void, OpenIssueError, CommandExecutor.CommandExecutor>
+    readonly open: (
+      url: string,
+    ) => Effect.Effect<void, OpenIssueError, CommandExecutor.CommandExecutor>;
   }
 >() {
   static readonly layer = Layer.effect(
@@ -37,9 +42,9 @@ export class BrowserService extends Context.Tag("@cli/BrowserService")<
               ? Command.make("open", url)
               : process.platform === "win32"
                 ? Command.make("cmd", "/c", "start", url)
-                : Command.make("xdg-open", url)
+                : Command.make("xdg-open", url);
 
-          yield* Command.exitCode(command)
+          yield* Command.exitCode(command);
         }).pipe(
           Effect.mapError(
             (error) =>
@@ -48,11 +53,11 @@ export class BrowserService extends Context.Tag("@cli/BrowserService")<
                 url,
               }),
           ),
-        )
+        );
 
-      return BrowserService.of({ open })
+      return BrowserService.of({ open });
     }),
-  )
+  );
 }
 
 export class IssueService extends Context.Tag("@cli/IssueService")<
@@ -60,38 +65,45 @@ export class IssueService extends Context.Tag("@cli/IssueService")<
   {
     readonly open: (
       input: OpenIssueInput,
-    ) => Effect.Effect<OpenIssueResult, OpenIssueError, CommandExecutor.CommandExecutor>
+    ) => Effect.Effect<
+      OpenIssueResult,
+      OpenIssueError,
+      CommandExecutor.CommandExecutor
+    >;
   }
 >() {
   static readonly layer = Layer.effect(
     IssueService,
     Effect.gen(function* () {
-      const browser = yield* BrowserService
+      const browser = yield* BrowserService;
 
       const open = (input: OpenIssueInput) =>
         Effect.gen(function* () {
-          const params = new URLSearchParams()
+          const params = new URLSearchParams();
 
           if (input.category) {
-            params.set("labels", input.category.toLowerCase().replace(" ", "-"))
+            params.set(
+              "labels",
+              input.category.toLowerCase().replace(" ", "-"),
+            );
           }
 
           if (input.title) {
-            params.set("title", input.title)
+            params.set("title", input.title);
           }
 
           if (input.description) {
-            params.set("body", input.description)
+            params.set("body", input.description);
           }
 
-          const issueUrl = `${REPO_URL}/issues/new?${params.toString()}`
+          const issueUrl = `${REPO_URL}/issues/new?${params.toString()}`;
 
-          yield* browser.open(issueUrl)
+          yield* browser.open(issueUrl);
 
-          return { issueUrl }
-        })
+          return { issueUrl };
+        });
 
-      return IssueService.of({ open })
+      return IssueService.of({ open });
     }),
-  )
+  );
 }
