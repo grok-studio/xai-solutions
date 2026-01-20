@@ -7,7 +7,11 @@ config({ path: "./.env" })
 
 const app = await alchemy("buildwithx-web-app", {
   password: process.env.ALCHEMY_PASSWORD,
-  stateStore: process.env.CI || process.env.GITHUB_ACTIONS ? (scope) => new CloudflareStateStore(scope) : undefined,
+  stateStore: process.env.CI || process.env.GITHUB_ACTIONS
+    ? (scope) => new CloudflareStateStore(scope, {
+        scriptName: "buildwithx-web-state"
+      })
+    : undefined,
 })
 
 export const web = await TanStackStart("buildwithx-web-app", {
